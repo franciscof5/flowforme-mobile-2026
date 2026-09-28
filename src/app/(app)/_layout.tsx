@@ -2,9 +2,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router/js-tabs';
 import { Platform } from 'react-native';
 
+import { useRecordingRecovery } from '@/camera/useRecordingRecovery';
 import { colors } from '@/constants/theme';
+import { useAuth } from '@/context/auth';
 
 export default function AppTabsLayout() {
+  const { user } = useAuth();
+  useRecordingRecovery(user?.username);
+
   return (
     <Tabs
       screenOptions={{

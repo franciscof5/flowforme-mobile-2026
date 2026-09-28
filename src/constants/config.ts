@@ -42,4 +42,8 @@ export const STORAGE_KEYS = {
   session: '@flowforme/session',
   wifiOnly: '@flowforme/wifi-only',
   pbAuth: '@flowforme/pb-auth',
+  /** Prefix for the per-user list of locally recorded videos. */
+  localVideosPrefix: '@flowforme/local-videos',
+  /** Marker for a recording in flight, used for crash recovery. */
+  pendingRecording: '@flowforme/pending-recording',
 } as const;

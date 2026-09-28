@@ -8,16 +8,22 @@
     "expo": "~57.0.25",
     "expo-constants": "~57.0.19",
     "expo-crypto": "~57.0.3",
+    "expo-dev-client": "~57.0.19",
+    "expo-file-system": "~57.0.7",
     "expo-font": "~57.0.4",
     "expo-linking": "~57.0.11",
     "expo-router": "~57.0.23",
     "expo-status-bar": "~57.0.1",
     "expo-video": "~57.0.5",
+    "expo-video-thumbnails": "~57.0.2",
     "pocketbase": "^0.28.1",
     "react": "19.2.3",
     "react-native": "0.86.3",
+    "react-native-nitro-image": "^0.15.2",
+    "react-native-nitro-modules": "^0.37.1",
     "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "~4.26.0"
+    "react-native-screens": "~4.26.0",
+    "react-native-vision-camera": "^5.2.3"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
@@ -26,10 +32,13 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
+    "prebuild:android": "expo prebuild --platform android",
+    "prebuild:ios": "expo prebuild --platform ios",
+    "build:android:dev": "eas build --profile development --platform android",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit"
   },

@@ -7,6 +7,7 @@ import { StatusView } from '@/components/StatusView';
 import { VideoListItem } from '@/components/VideoListItem';
 import { colors } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
+import { useLocalVideos } from '@/hooks/useLocalVideos';
 import { useVideos } from '@/hooks/useVideos';
 import {
   editedNames,
@@ -35,14 +36,23 @@ export function VideoList({
   const { videos, isLoading, isRefreshing, error, refresh, reload } = useVideos(
     user?.bucket,
   );
+  const localVideos = useLocalVideos(user?.username);
+
+  // Locally recorded videos live alongside the bucket listing in Originais.
+  const allVideos = useMemo(
+    () => [...localVideos, ...videos],
+    [localVideos, videos],
+  );
 
   const data = useMemo(
     () =>
-      mode === 'originals' ? selectOriginals(videos) : selectEdited(videos),
-    [mode, videos],
+      mode === 'originals'
+        ? selectOriginals(allVideos)
+        : selectEdited(allVideos),
+    [mode, allVideos],
   );
 
-  const edited = useMemo(() => editedNames(videos), [videos]);
+  const edited = useMemo(() => editedNames(allVideos), [allVideos]);
 
   // Drop a pending row once the uploaded object shows up in the API list.
   const visiblePending = useMemo(() => {
@@ -91,11 +101,11 @@ export function VideoList({
     [mode, edited, openPlayer, onDismissUpload],
   );
 
-  if (isLoading) {
+  if (isLoading && allVideos.length === 0) {
     return <StatusView kind="loading" />;
   }
 
-  if (error) {
+  if (error && allVideos.length === 0) {
     return <StatusView kind="error" message={error} onRetry={reload} />;
   }
 

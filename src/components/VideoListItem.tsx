@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { colors } from '@/constants/theme';
-import { formatBytes, formatDate } from '@/lib/format';
+import { formatBytes, formatDate, formatDuration } from '@/lib/format';
 import type { VideoObject } from '@/types/video';
 
 interface VideoListItemProps {
@@ -29,9 +29,22 @@ export function VideoListItem({
       <View style={styles.thumbnail}>
         <Ionicons name="videocam" size={22} color={colors.textFaint} />
         <Image
-          source={{ uri: thumbnailUri(video.key) }}
+          source={
+            video.thumbnailUrl
+              ? { uri: video.thumbnailUrl }
+              : video.durationMs == null
+                ? { uri: thumbnailUri(video.key) }
+                : undefined
+          }
           style={StyleSheet.absoluteFill}
         />
+        {video.durationMs != null ? (
+          <View style={styles.durationBadge}>
+            <Text style={styles.durationLabel}>
+              {formatDuration(video.durationMs)}
+            </Text>
+          </View>
+        ) : null}
         <View style={styles.playBadge}>
           <Ionicons name="play" size={12} color={colors.text} />
         </View>
@@ -51,6 +64,9 @@ export function VideoListItem({
 
         <Text style={styles.meta} numberOfLines={1}>
           {formatDate(video.lastModified)} · {formatBytes(video.size)}
+          {video.durationMs != null
+            ? ` · ${formatDuration(video.durationMs)}`
+            : ''}
         </Text>
       </View>
 
@@ -87,6 +103,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.overlay,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  durationBadge: {
+    position: 'absolute',
+    left: 6,
+    bottom: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    backgroundColor: colors.overlay,
+  },
+  durationLabel: {
+    color: colors.text,
+    fontSize: 10,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
   info: {
     flex: 1,

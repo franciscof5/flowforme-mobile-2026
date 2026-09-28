@@ -12,6 +12,14 @@ export function formatBytes(bytes: number): string {
   return `${value.toFixed(decimals)} ${units[exponent]}`;
 }
 
+/** `90000` -> `01:30`. Used for video duration and the recording timer. */
+export function formatDuration(ms: number): string {
+  const totalSeconds = Math.max(0, Math.round(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
 export function formatDate(input: string | number | Date): string {
   const date = new Date(input);
   if (Number.isNaN(date.getTime())) return 'Data desconhecida';

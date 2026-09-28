@@ -17,6 +17,8 @@ export { ApiError } from '@/api/FlowApi';
 export type { FlowApi, PresignedUpload } from '@/api/FlowApi';
 export { simulateUpload, uploadWithRetry, UploadError } from '@/api/uploader';
 export type { UploadFile, UploadResult } from '@/api/uploader';
+export { enqueue, getEnqueuedItems, resetQueue } from '@/api/queue';
+export type { EnqueueItem } from '@/api/queue';
 
 export const isMockMode = USE_MOCK;
 
@@ -69,9 +71,13 @@ function pad2(value: number): string {
   return String(value).padStart(2, '0');
 }
 
-/** `{username}/{YYYY}-{MM}-{DD}-{uuid}.mp4`, using the device's local date. */
-export function buildVideoKey(
+/**
+ * `{username}/{YYYY}-{MM}-{DD}-{uuid}.mp4`, using the device's local date and a
+ * caller-provided uuid (v4).
+ */
+export function buildVideoKeyForUuid(
   username: string,
+  uuid: string,
   date: Date = new Date(),
 ): string {
   const safeUser =
@@ -81,7 +87,15 @@ export function buildVideoKey(
   const stamp = `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
     date.getDate(),
   )}`;
-  return `${safeUser}/${stamp}-${Crypto.randomUUID()}.mp4`;
+  return `${safeUser}/${stamp}-${uuid}.mp4`;
+}
+
+/** `{username}/{YYYY}-{MM}-{DD}-{uuid}.mp4` with a fresh uuid v4. */
+export function buildVideoKey(
+  username: string,
+  date: Date = new Date(),
+): string {
+  return buildVideoKeyForUuid(username, Crypto.randomUUID(), date);
 }
 
 /**

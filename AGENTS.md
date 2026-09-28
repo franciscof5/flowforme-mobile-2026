@@ -14,12 +14,22 @@ Use `bunx` instead of `npx` if the project uses bun (`bun.lock` present).
 
 ```bash
 npx expo install <package>  # ALWAYS use instead of npm/yarn/pnpm/bun add — resolves SDK-compatible versions
-npx expo start              # start the dev server
+npx expo start              # start the dev server (dev client)
 npx expo lint               # lint
 npx tsc --noEmit            # typecheck
 npx expo-doctor             # diagnose dependency and config issues
 npx expo install --fix      # fix incompatible package versions
 ```
+
+The Câmera tab uses native code, so the app must run as a development build (not Expo Go):
+
+```bash
+npx expo prebuild --platform android        # generate the native project (CNG)
+npx expo run:android                        # build & install locally on a device/emulator
+npx eas-cli@latest build --profile development --platform android  # or build in the cloud
+```
+
+Equivalent npm scripts: `npm run prebuild:android`, `npm run android`, `npm run build:android:dev`.
 
 Run lint and typecheck before declaring any task done.
 
@@ -43,6 +53,8 @@ Docs: https://docs.expo.dev/eas/index.md
 - `src/hooks/` — data hooks.
 - `src/lib/` — API clients and helpers (PocketBase, formatting, selectors).
 - `src/data/` — fake data in the final API shape (`key`, `name`, `size`, `lastModified`, `url`), used only by `MockApi`.
+- `src/camera/` — VisionCamera pipeline: `useCameraRecording` (record/pause/resume/stop + 90s limit), `recordings` (persistent local records + crash recovery), `format` (720p@30 resolution picker) and the isolated `audio.ts`.
+- `src/config/` — camera capture constants/targets (`camera.ts`).
 - `src/constants/` — config flags and the dark theme.
 - `src/types/` — shared TypeScript types.
 
@@ -63,7 +75,10 @@ Docs: https://docs.expo.dev/eas/index.md
 ## Domain rules
 
 - Edited files end with `-sultano.mp4` (`EDITED_SUFFIX`). The Originais tab shows originals, the Editados tab shows the suffixed files, and an original gets the "Editado" badge when its edited pair exists.
-- A dev-only "Simular gravação" button in the Originais tab (`__DEV__ && USE_MOCK`) exercises the upload flow; remove it in stage 3.
+- The Câmera tab records with `react-native-vision-camera` (v5). It has **no Expo config plugin**, so camera/mic permissions live in `app.json` (`android.permissions` + `ios.infoPlist`) and the app requires a development build.
+- Capture targets live in `src/config/camera.ts` (1280x720@30, 90s limit); `resolveCameraSupport` picks the closest device format and the UI warns when the exact target is unavailable.
+- A finished take is moved from the recorder's temporary file into `Paths.document`, gets a thumbnail + local record (shown in Originais with duration) and is handed to `enqueue()` (`src/api/queue.ts`), a placeholder for the stage-4 upload queue.
+- Orientation is explicit (`orientationSource="custom"`). Switching camera/orientation is blocked while recording; the 90s countdown only advances while recording (pause freezes it) and auto-stops at the limit. Backgrounding while recording finalizes the file; a crashed take is recovered on next launch via the pending-recording marker.
 
 ## Rules
 
